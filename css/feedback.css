@@ -22,3 +22,9 @@
 #feedback-form #edit-institution {
     width: 95%;
 }
+#feedback-form #edit-first-name,
+#feedback-form #edit-last-name,
+#feedback-form #edit-email,
+#feedback-form #edit-phone {
+    width: 97%;
+}
