@@ -1,6 +1,6 @@
 .form-radios .form-item {
     display:inline;
-    margin-right: 5px;
+    margin-right: 5px !important;
 }
 .form-checkboxes .form-item {
     margin-bottom: 5px;
