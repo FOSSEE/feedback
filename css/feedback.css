@@ -1,3 +1,9 @@
 .form-radios .form-item {
     display:inline;
 }
+.form-checkboxes .form-item {
+    margin-bottom: 5px;
+}
+.form-item label {
+    margin-bottom: 5px;
+}
