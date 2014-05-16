@@ -8,3 +8,17 @@
 .form-item label {
     margin-bottom: 5px;
 }
+#feedback-form #edit-first-name-wrapper,
+#feedback-form #edit-email-wrapper {
+    width: 45%;
+    float: left;
+    margin-right: 6%;
+}
+#feedback-form #edit-last-name-wrapper,
+#feedback-form #edit-phone-wrapper {
+    width: 45%;
+    float: left;
+}
+#feedback-form #edit-institution {
+    width: 95%;
+}
