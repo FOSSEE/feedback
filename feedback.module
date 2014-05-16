@@ -92,15 +92,25 @@
             "),
             "#required" => TRUE
         );
+        $form["wrapper"]["platform"] = array(
+            "#type" => "radios",
+            "#title" => t("6. On which platform do you use Oscad?"),
+            "#options" => array(
+                t("GNU/Linux"),
+                t("Windows"),
+                t("Both")
+            ),
+            "#required" => TRUE
+        );
         $form["wrapper"]["missing"] = array(
             "#type" => "textarea",
-            "#title" => t("6. Any feature you find missing in Oscad?"),
+            "#title" => t("7. Any feature you find missing in Oscad?"),
             "#required" => TRUE
         );
         $form["wrapper"]["workshop"] = array(
             "#type" => "radios",
             "#title" => t("
-                7. Would you like to have a workshop 
+                8. Would you like to have a workshop 
                 on advanced features of Oscad?
             "),
             "#options" => array(
@@ -111,7 +121,7 @@
         $form["wrapper"]["future"] = array(
             "#type" => "radios",
             "#title" => t("
-                8. Can we contact you in the future to 
+                9. Can we contact you in the future to 
                 know your experience with Oscad?
             "),
             "#options" => array(
@@ -122,15 +132,15 @@
         $form["wrapper"]["contact"] = array(
             "#type" => "textarea",
             "#title" => t("
-                9. Please provide your contact details if you 
-                selected 'Yes' in question 7 or 8.
+                10. Please provide your contact details if you 
+                selected 'Yes' in question 8 or 9.
             "),
             "#required" => FALSE
         );
         $form["wrapper"]["magazines"] = array(
             "#type" => "textarea",
             "#title" => t("
-                10. In order to inform the college teachers and students 
+                11. In order to inform the college teachers and students 
                 about Oscad, we plan to place advertisements. 
                 Which technical magazines do you read?
             "),
@@ -139,7 +149,7 @@
         $form["wrapper"]["suggestion"] = array(
             "#type" => "textarea",
             "#title" => t("
-                11. Any other Suggestions / Feedback / Appreciation
+                12. Any other Suggestions / Feedback / Appreciation
             "),
             "#required" => FALSE
         );
@@ -155,9 +165,9 @@
         $v = $form_state["values"];
         if(($v["workshop"] == 0 || $v["future"] == 0) && $v["contact"] == "") {
             form_set_error("contact", "
-                9. Please provide your contact details if you selected 'Yes' 
-                in question 7 or 8. This field is required since you selected
-                'Yes' in question 7 or 8.
+                10. Please provide your contact details if you selected 'Yes' 
+                in question 8 or 9. This field is required since you selected
+                'Yes' in question 8 or 9.
             ");
         }
         if($v["email"] && !valid_email_address($v["email"])) {
@@ -180,15 +190,15 @@
         $query = "
             INSERT INTO feedback (
                 first_name, last_name, email, phone, institution, activities, 
-                rating, liked, disliked, difficulties, missing, workshop, 
-                future, contact, magazines, suggestion
+                rating, liked, disliked, difficulties, platform, missing, 
+                workshop, future, contact, magazines, suggestion
             ) VALUES (
                 '{$v["first_name"]}', '{$v["last_name"]}', '{$v["email"]}', 
                 '{$v["phone"]}', '{$v["institution"]}', '{$v["activities"]}', 
                 {$v["rating"]}, '{$v["liked"]}', '{$v["disliked"]}', 
-                '{$v["difficulties"]}', '{$v["missing"]}', {$v["workshop"]}, 
-                {$v["future"]}, '{$v["contact"]}', '{$v["magazines"]}', 
-                '{$v["suggestion"]}'
+                '{$v["difficulties"]}', {$v["platform"]}, '{$v["missing"]}',
+                {$v["workshop"]}, {$v["future"]}, '{$v["contact"]}', 
+                '{$v["magazines"]}', '{$v["suggestion"]}'
             )
         ";
         $result = db_query($query);
