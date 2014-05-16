@@ -1,0 +1,217 @@
+<?php 
+    function feedback_menu() {
+        $items = array();
+        $items["feedback"] = array(
+            "title"  => "Oscad workshop feedback form.",
+            "page callback" => "feedback_all",
+            "access arguments" => array("access feedback"),
+            "type" => MENU_CALLBACK
+        );
+        $items["feedback/thank-you"] = array(
+            "title"  => "Thank you",
+            "page callback" => "feedback_thank_you_all",
+            "access arguments" => array("access feedback"),
+            "type" => MENU_CALLBACK
+        );
+        return $items;
+    }
+
+    function feedback_perm() {
+        return array(
+            "access feedback",
+        );
+    }
+
+    function feedback_form($form, &$form_state) {
+        $form = array();
+        $form["name"] = array(
+            "#type" => "textfield",
+            "#title" => t("Full name"),
+            "#required" => FALSE
+        );
+        $form["email"] = array(
+            "#type" => "textfield",
+            "#title" => t("Email"),
+            "#required" => FALSE
+        );
+        $form["institution"] = array(
+            "#type" => "textfield",
+            "#title" => t("Institution/College"),
+            "#required" => FALSE
+        );
+        $form["activities"] = array(
+            "#type" => "checkboxes",
+            "#title" => t(" 
+                1. Which of the following activities are you interested to 
+                contribute to (Tick all that are applicable.)?
+            "),
+            "#options" => get_activities(),
+            "#required" => TRUE
+        );
+        $form["rating"] = array(
+            "#type" => "radios",
+            "#title" => t("
+                2. How would you rate this workshop on a scale of 5?
+            "),
+            "#options" => array_combine(range(1, 5), range(1, 5)),
+            "#required" => TRUE
+        );
+        $form["liked"] = array(
+            "#type" => "textarea",
+            "#title" => t("3. Things that you liked in Oscad workshop"),
+            "#required" => TRUE
+        );
+        $form["disliked"] = array(
+            "#type" => "textarea",
+            "#title" => t("4. Things that you disliked in Oscad workshop"),
+            "#required" => TRUE
+        );
+        $form["difficulties"] = array(
+            "#type" => "textarea",
+            "#title" => t("
+                5. Did you face any difficulties while using Oscad?
+            "),
+            "#required" => TRUE
+        );
+        $form["missing"] = array(
+            "#type" => "textarea",
+            "#title" => t("6. Any feature you find missing in Oscad?"),
+            "#required" => TRUE
+        );
+        $form["workshop"] = array(
+            "#type" => "radios",
+            "#title" => t("
+                7. Would you like to have a workshop 
+                on advanced features of Oscad?
+            "),
+            "#options" => array(
+                t("Yes"), t("No")
+            ),
+            "#required" => TRUE
+        );
+        $form["future"] = array(
+            "#type" => "radios",
+            "#title" => t("
+                8. Can we contact you in the future to 
+                know your experience with Oscad?
+            "),
+            "#options" => array(
+                t("Yes"), t("No")
+            ),
+            "#required" => TRUE
+        );
+        $form["contact"] = array(
+            "#type" => "textarea",
+            "#title" => t("
+                9. Please provide your contact details if you 
+                selected 'Yes' in question 7 or 8.
+            "),
+            "#required" => FALSE
+        );
+        $form["magazines"] = array(
+            "#type" => "textarea",
+            "#title" => t("
+                10. In order to inform the college teachers and students 
+                about Oscad, we plan to place advertisements. 
+                Which technical magazines do you read?
+            "),
+            "#required" => FALSE
+        );
+        $form["suggestion"] = array(
+            "#type" => "textarea",
+            "#title" => t("
+                11. Any other Suggestions / Feedback / Appreciation
+            "),
+            "#required" => FALSE
+        );
+        $form["submit"] = array(
+            "#type" => "submit",
+            "#value" => "Submit feedback"
+        );
+        return $form;
+    }
+
+    function feedback_form_validate($form, &$form_state) {
+        /* making contact field required if 'Yes' in workshop/future field */
+        $v = $form_state["values"];
+        if(($v["workshop"] == 0 || $v["future"] == 0) && $v["contact"] == "") {
+            form_set_error("contact", "
+                9. Please provide your contact details if you selected 'Yes' 
+                in question 7 or 8. This field is required since you selected
+                'Yes' in question 7 or 8.
+            ");
+        }
+        if($v["email"] && !valid_email_address($v["email"])) {
+            form_set_error("email", "Please enter a valid email id.");
+        }
+    }
+
+    function feedback_form_submit($form, &$form_state) {
+        /* escaping special characters */
+        foreach($form_state["values"] as $key => $value) {
+            if(gettype($value) == "string") {
+                $form_state["values"][$key] = db_escape_string($value);
+            }
+        }
+        $v = $form_state["values"];
+        $v["activities"] = implode(",", array_filter($v["activities"]));
+        $query = "
+            INSERT INTO feedback (
+                name, email, institution, activities, rating, liked, disliked,
+                difficulties, missing, workshop, future, contact, magazines,
+                suggestion
+            ) VALUES (
+                '{$v["name"]}', '{$v[email]}', '{$v[institution]}',
+                '{$v["activities"]}', {$v["rating"]}, '{$v["liked"]}',
+                '{$v["disliked"]}', '{$v["difficulties"]}', '{$v["missing"]}',
+                {$v["workshop"]}, {$v["future"]}, '{$v["contact"]}',
+                '{$v["magazines"]}', '{$v["suggestion"]}'
+            )
+        ";
+        $result = db_query($query);
+        drupal_goto("feedback/thank-you");
+    }
+
+    function feedback_all() {
+        $page_content = "";
+        $page_content .= "
+            Feedback form for the Oscad workshop conducted 
+            on 10th May 2014 at PESIT, Bangalore. <br><br>
+        ";
+        $page_content .= "
+            <div style='color: red;'>
+                <sup>*</sup> Required
+            </div>
+        ";
+        $page_content .= drupal_get_form("feedback_form");
+        return $page_content;
+    }
+
+    function feedback_thank_you_all() {
+        $page_content = "";
+        $page_content .= "<br>";
+        $page_content .= l("Click here", "feedback");
+        $page_content .= " to submit another feedback.";
+        drupal_set_message("Feedback recorded successfully.");
+        return $page_content;
+    }
+
+    function feedback_init() {
+        /* for future use */
+    }
+
+    /* helper functions */
+    function get_activities() {
+        return array(
+            1 => t("Creating a textbook companion (TBC)"),
+            2 => t("Migrating your lab to Oscad (LM)"),
+            3 => t("Adding to component library (CL)"),
+            4 => t("Doing projects (BE, M.Sc, ME, Ph.D) with Oscad"),
+            5 => t("Review of the above (TBC, LM, CL, projects)"),
+            6 => t("Building hardware using Oscad and testing"),
+            7 => t("Enhancing the capabilities of Oscad - need IT expertise"),
+            8 => t("Creation of Spoken Tutorials on Oscad"),
+            9 => t("Promoting Oscad"),
+        );
+    }
+?>
